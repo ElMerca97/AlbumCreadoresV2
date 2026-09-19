@@ -4,6 +4,7 @@ import { stickers, type Sticker } from "@/data/stickers";
 import { shortName } from "@/lib/rarity";
 import { useAlbumStore, useOwnedSet } from "@/store/albumStore";
 import { cn } from "@/utils/cn";
+import FriendlyView from "./FriendlyView";
 import PlayerPicker from "./PlayerPicker";
 import StickerCard from "./StickerCard";
 
@@ -290,6 +291,9 @@ export default function LineupView({ onOpenCard }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Partidos amistosos (Etapa 1) — juega con la alineación armada arriba */}
+      <FriendlyView />
 
       {picker && (
         <PlayerPicker

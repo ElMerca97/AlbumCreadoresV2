@@ -1,16 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { CODES } from "@/data/codes";
 import { useAlbumStore } from "@/store/albumStore";
+import { useFriendlyStore } from "@/store/friendlyStore";
+import { useLeagueStore } from "@/store/leagueStore";
 import { cn } from "@/utils/cn";
+import CoinIcon from "./CoinIcon";
+
+/** Código administrativo especial: abre el panel admin y NUNCA se consume. */
+const ADMIN_CODE = "ADMIN97";
 
 export default function CodeModal({ onClose }: { onClose: () => void }) {
   const redeem = useAlbumStore((s) => s.redeem);
+  const addCoins = useAlbumStore((s) => s.addCoins);
   const redeemed = useAlbumStore((s) => s.redeemed);
   const coins = useAlbumStore((s) => s.coins);
+  const resetFriendlies = useFriendlyStore((s) => s.resetFriendlies);
+  const resetFixture = useLeagueStore((s) => s.resetFixture);
 
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [reveal, setReveal] = useState<string | null>(null);
+  const [admin, setAdmin] = useState(false);
+  const [adminCoins, setAdminCoins] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -27,12 +38,32 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    // ADMIN97 abre el panel administrador sin consumirse ni entrar en redeemed.
+    if (value.trim().toUpperCase().replace(/\s+/g, "") === ADMIN_CODE) {
+      setAdmin(true);
+      setStatus(null);
+      setValue("");
+      return;
+    }
     const res = redeem(value);
     setStatus({ ok: res.ok, message: res.message });
     if (res.ok) {
       setValue("");
       setReveal(null);
     }
+  };
+
+  /** Panel admin: agrega CreaCoins con el addCoins() existente. */
+  const submitAdminCoins = (e: React.FormEvent) => {
+    e.preventDefault();
+    const n = Number(adminCoins);
+    if (adminCoins.trim() === "" || !Number.isFinite(n) || n <= 0) {
+      setStatus({ ok: false, message: "Ingresá una cantidad positiva mayor que 0." });
+      return;
+    }
+    addCoins(n);
+    setAdminCoins("");
+    setStatus({ ok: true, message: `+${n} CreaCoins agregados correctamente.` });
   };
 
   return (
@@ -69,6 +100,113 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
+        {admin ? (
+          <div className="p-5 sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="font-display text-[10px] tracking-[0.3em] text-rose-400">
+                PANEL ADMINISTRADOR · MODO LOCAL
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setAdmin(false);
+                  setStatus(null);
+                }}
+                className="rounded-lg border border-line px-2.5 py-1 font-display text-[10px] tracking-widest text-dim transition hover:border-line-strong hover:text-ink"
+              >
+                SALIR
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-dim">
+              Herramienta administrativa del proyecto. No es un sistema de seguridad.
+            </p>
+
+            {status && (
+              <p
+                className={cn(
+                  "animate-fade-up mt-4 rounded-xl border px-4 py-2.5 text-sm",
+                  status.ok
+                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                    : "border-rose-400/30 bg-rose-400/10 text-rose-300",
+                )}
+              >
+                {status.message}
+              </p>
+            )}
+
+            <div className="mt-4 space-y-3">
+              <div className="rounded-2xl border border-line bg-panel p-4">
+                <p className="font-display text-xs tracking-widest text-amber-500">
+                  AMISTOSOS
+                </p>
+                <p className="mt-1 text-xs text-dim">
+                  Restablece el límite a 3/3 (últimas 5 horas). No borra historial ni monedas.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFriendlies();
+                    setStatus({ ok: true, message: "Amistosos restablecidos: 3/3 disponibles." });
+                  }}
+                  className="mt-3 w-full rounded-xl bg-gradient-to-r from-emerald-400 to-lime-400 px-4 py-2.5 font-display text-sm tracking-widest text-emerald-950 transition hover:brightness-110 active:scale-95"
+                >
+                  RESET AMISTOSOS
+                </button>
+              </div>
+
+              <form onSubmit={submitAdminCoins} className="rounded-2xl border border-line bg-panel p-4">
+                <p className="font-display text-xs tracking-widest text-amber-500">
+                  CREACOINS
+                </p>
+                <p className="mt-1 text-xs text-dim">
+                  Suma la cantidad exacta con el sistema de monedas existente.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={adminCoins}
+                    onChange={(e) => {
+                      setAdminCoins(e.target.value);
+                      setStatus(null);
+                    }}
+                    placeholder="1000"
+                    className="min-w-0 flex-1 rounded-xl border border-line bg-page-2 px-4 py-2.5 font-display text-ink focus:border-amber-400/70 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="shrink-0 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-4 py-2.5 font-display text-sm tracking-widest text-amber-950 transition hover:brightness-110 active:scale-95"
+                  >
+                    AGREGAR CREACOINS
+                  </button>
+                </div>
+              </form>
+
+              <div className="rounded-2xl border border-line bg-panel p-4">
+                <p className="font-display text-xs tracking-widest text-amber-500">
+                  FIXTURE
+                </p>
+                <p className="mt-1 text-xs text-dim">
+                  Deja la liga 0-0: borra resultados de partidos y la tabla vuelve a 0. Solo
+                  afecta la liga, no el álbum ni las monedas.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("¿Reiniciar el Fixture? Todos los partidos vuelven a 0-0.")) {
+                      resetFixture();
+                      setStatus({ ok: true, message: "Fixture reiniciado: tabla en 0 puntos." });
+                    }
+                  }}
+                  className="mt-3 w-full rounded-xl bg-panel-2 px-4 py-2.5 font-display text-sm tracking-widest text-ink transition hover:bg-line-strong active:scale-95"
+                >
+                  RESET FIXTURE
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={submit} className="p-5 sm:p-6">
           <div className="flex gap-2">
             <input
@@ -108,7 +246,9 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
             <p className="font-display text-[10px] tracking-[0.25em] text-faint">
               PISTAS · {redeemed.length}/{CODES.length} USADOS
             </p>
-            <p className="font-display text-sm tracking-widest text-amber-400">{coins} 🪙</p>
+            <p className="font-display text-sm tracking-widest text-amber-400">
+              {coins} <CoinIcon />
+            </p>
           </div>
 
           <ul className="mt-2 max-h-64 space-y-1.5 overflow-y-auto pr-1">
@@ -153,6 +293,7 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
             })}
           </ul>
         </form>
+        )}
       </div>
     </div>
   );

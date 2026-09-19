@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { stickers, type Rarity, type Sticker } from "@/data/stickers";
-import { SELL_VALUE } from "@/lib/rarity";
 import { useAlbumStore, useOwnedSet } from "@/store/albumStore";
 import { cn } from "@/utils/cn";
 import StickerCard from "./StickerCard";
+import CoinIcon from "./CoinIcon";
 
 type Weight = { rarity: Rarity; w: number };
 
@@ -283,15 +283,13 @@ export default function PacksView({ onOpenCard }: Props) {
   const [pulled, setPulled] = useState<{ sticker: Sticker; isNew: boolean }[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [reward, setReward] = useState<{ fresh: number[]; gained: number } | null>(null);
-  const [match, setMatch] = useState<{ text: string; coins: number } | null>(null);
-  const [playing, setPlaying] = useState(false);
 
   const canAfford = (p: PackDef) => coins >= p.cost;
   const allFlipped = pulled.length > 0 && flipped.length === pulled.length;
 
   const openPack = (p: PackDef) => {
     if (!canAfford(p)) return;
-    onSpend(p.cost);
+    onSpend(-p.cost);
     const cards = drawPack(p, ownedSet);
     setPack(p);
     setPulled(cards.map((sticker) => ({ sticker, isNew: !ownedSet.has(sticker.id) })));
@@ -319,28 +317,6 @@ export default function PacksView({ onOpenCard }: Props) {
 
   const flipOne = (i: number) =>
     setFlipped((f) => (f.includes(i) ? f : [...f, i]));
-
-  const playMatch = () => {
-    if (playing) return;
-    setPlaying(true);
-    setMatch(null);
-    const goals = Math.floor(Math.random() * 5);
-    const conceded = Math.floor(Math.random() * 3);
-    const win = goals > conceded;
-    const coinsWon = Math.max(45, Math.round(60 + goals * 28 + (win ? 40 : 0) + Math.random() * 40));
-    window.setTimeout(() => {
-      setMatch({
-        text: win
-          ? `¡Victoria ${goals}-${conceded} de la Selección!`
-          : goals === conceded
-            ? `Empate ${goals}-${conceded}. Se pelea hasta el final.`
-            : `Derrota ${goals}-${conceded}. Se remonta en la próxima.`,
-        coins: coinsWon,
-      });
-      onSpend(-coinsWon);
-      setPlaying(false);
-    }, 1200);
-  };
 
   const odds = useMemo(
     () => new Map(PACKS.map((p) => [p.id, packOdds(p)])),
@@ -430,7 +406,7 @@ export default function PacksView({ onOpenCard }: Props) {
                 </div>
                 <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
                   <p className="font-display text-xl tracking-widest text-amber-300">
-                    +{reward.gained} 🪙 EN REPETIDAS
+                    +{reward.gained} <CoinIcon /> EN REPETIDAS
                   </p>
                   <p className="mt-1 text-sm text-amber-100/80">
                     Las repetidas se guardan para vender cuando quieras.
@@ -466,7 +442,7 @@ export default function PacksView({ onOpenCard }: Props) {
                     disabled={!pack || !canAfford(pack)}
                     className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-5 py-3 font-display tracking-widest text-amber-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    ABRIR OTRO · {pack?.cost} 🪙
+                    ABRIR OTRO · {pack?.cost} <CoinIcon />
                   </button>
                   <button
                     type="button"
@@ -486,31 +462,6 @@ export default function PacksView({ onOpenCard }: Props) {
 
   return (
     <div className="space-y-8">
-      {/* Ganar monedas */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-400/20 bg-gradient-to-r from-emerald-400/10 to-transparent p-4">
-        <div>
-          <h3 className="font-display text-xl tracking-wide text-ink">
-            ¿Te quedaste sin monedas?
-          </h3>
-          <p className="text-sm text-dim">
-            Jugá un amistoso, vendé repetidas o cargá un código de canje tocando las monedas de la cabecera.
-          </p>
-          {match && (
-            <p className="mt-2 font-display tracking-widest text-emerald-300">
-              {match.text} <span className="text-amber-300">+{match.coins} 🪙</span>
-            </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={playMatch}
-          disabled={playing}
-          className="shrink-0 rounded-xl bg-gradient-to-r from-emerald-400 to-lime-400 px-6 py-3 font-display text-lg tracking-widest text-emerald-950 transition hover:brightness-110 active:scale-95 disabled:opacity-50"
-        >
-          {playing ? "JUGANDO…" : "JUGAR AMISTOSO"}
-        </button>
-      </div>
-
       {/* Tienda */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {PACKS.map((p, i) => (
@@ -554,7 +505,13 @@ export default function PacksView({ onOpenCard }: Props) {
                       : "cursor-not-allowed bg-panel-2 text-faint",
                   )}
                 >
-                  {canAfford(p) ? `ABRIR · ${p.cost} 🪙` : `FALTAN ${p.cost - coins} 🪙`}
+                  {canAfford(p) ? (
+              <>
+                ABRIR · {p.cost} <CoinIcon />
+              </>
+            ) : (
+              <>FALTAN {p.cost - coins} <CoinIcon /></>
+            )}
                 </button>
               </div>
             </div>
@@ -563,11 +520,8 @@ export default function PacksView({ onOpenCard }: Props) {
       </div>
 
       <p className="text-center text-xs text-faint">
-        Probabilidades informativas. Las repetidas se pueden vender por{" "}
-        {Object.entries(SELL_VALUE)
-          .map(([k, v]) => `${k.toLowerCase()} ${v}🪙`)
-          .join(" · ")}
-        .
+        Probabilidades informativas. Las repetidas se pueden vender por 5-15{" "}
+        <CoinIcon /> por repetida.
       </p>
     </div>
   );

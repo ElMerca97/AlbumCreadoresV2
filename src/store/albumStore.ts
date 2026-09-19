@@ -43,7 +43,7 @@ export type AlbumActions = {
   addCoins: (n: number) => void;
   /** Canjea un código: suma monedas y/o figuritas de regalo. */
   redeem: (raw: string) => RedeemResult;
-  /** Suma figuritas al álbum. Devuelve las nuevas y el valor de las repetidas. */
+  /** Suma figuritas al álbum. Devuelve las nuevas pegadas; gained queda en 0 (sin recompensa inmediata). */
   addStickers: (ids: number[]) => { fresh: number[]; gained: number };
   /** Vende una repetida. Devuelve las monedas ganadas. */
   sellExtra: (id: number) => number;
@@ -168,7 +168,7 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
           redeemed: [...s.redeemed, code],
         }));
 
-        const parts = [`+${found.coins} 🪙`];
+        const parts = [`+${found.coins} CreaCoins`];
         if (giftNames.length) parts.push(`regalo: ${giftNames.join(", ")}`);
         return { ok: true, message: `¡Código canjeado! ${parts.join(" · ")}`, coins: found.coins };
       },
@@ -178,11 +178,11 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
         const ownedSet = new Set(owned);
         const nextExtras = { ...extras };
         const fresh: number[] = [];
-        let gained = 0;
+        // Las repetidas solo se guardan; no acreditan monedas al salir del sobre.
+        const gained = 0;
         for (const id of ids) {
           if (ownedSet.has(id)) {
             nextExtras[id] = (nextExtras[id] ?? 0) + 1;
-            gained += valueOf(id);
           } else {
             ownedSet.add(id);
             fresh.push(id);
@@ -196,19 +196,23 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
         const { extras } = get();
         const count = extras[id] ?? 0;
         if (count <= 0) return 0;
-        const value = valueOf(id);
+        // Recompensa aleatoria por venta: 5-15 CreaCoins, sin importar la rareza.
+        const reward = Math.floor(Math.random() * 11) + 5;
         const next = { ...extras };
         if (count <= 1) delete next[id];
         else next[id] = count - 1;
-        set((s) => ({ extras: next, coins: s.coins + value }));
-        return value;
+        set((s) => ({ extras: next, coins: s.coins + reward }));
+        return reward;
       },
 
       sellAllExtras: () => {
         const entries = Object.entries(get().extras);
         if (entries.length === 0) return 0;
+        // Cada repetida genera su propia recompensa aleatoria de 5-15 CreaCoins.
         let total = 0;
-        for (const [id, count] of entries) total += valueOf(Number(id)) * count;
+        for (const [, count] of entries) {
+          for (let i = 0; i < count; i++) total += Math.floor(Math.random() * 11) + 5;
+        }
         set((s) => ({ extras: {}, coins: s.coins + total }));
         return total;
       },

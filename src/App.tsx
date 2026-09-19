@@ -3,6 +3,7 @@ import cover from "@/assets/cover.jpg";
 import AlbumView from "@/components/AlbumView";
 import CardModal from "@/components/CardModal";
 import CodeModal from "@/components/CodeModal";
+import CoinIcon from "@/components/CoinIcon";
 import ImageChecker from "@/components/ImageChecker";
 import LeagueView from "@/components/LeagueView";
 import LineupView from "@/components/LineupView";
@@ -84,7 +85,7 @@ export default function App() {
               title="Cargar código de canje"
               className="group flex items-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 transition hover:bg-amber-400/20 active:scale-95"
             >
-              <span className="text-base transition group-hover:rotate-12">🪙</span>
+              <CoinIcon className="transition group-hover:rotate-12" />
               <span
                 key={coins}
                 className="animate-pop font-display text-lg leading-none text-amber-400"

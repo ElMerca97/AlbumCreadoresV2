@@ -3,6 +3,7 @@ import { SECTIONS, stickers, type Sticker } from "@/data/stickers";
 import { useAlbumStore, useAlbumStats, useOwnedSet } from "@/store/albumStore";
 import { useUIStore } from "@/store/uiStore";
 import { cn } from "@/utils/cn";
+import CoinIcon from "./CoinIcon";
 import StickerCard from "./StickerCard";
 
 /** Splits de cada hoja del álbum: [izquierda, derecha, checklist] */
@@ -121,7 +122,7 @@ export default function AlbumView({ onOpen }: Props) {
   const ownedSet = useOwnedSet();
   const extras = useAlbumStore((s) => s.extras);
   const sellAllExtras = useAlbumStore((s) => s.sellAllExtras);
-  const { dupesValue: extraTotal } = useAlbumStats();
+  const { dupes } = useAlbumStats();
 
   const albumView = useUIStore((s) => s.albumView);
   const setAlbumView = useUIStore((s) => s.setAlbumView);
@@ -222,17 +223,18 @@ export default function AlbumView({ onOpen }: Props) {
         </button>
       </div>
 
-      {extraTotal > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3">
+      {dupes > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3">
           <p className="text-sm text-amber-500">
-            Tenés figuritas repetidas guardadas. Vendelas y sumá monedas para más sobres.
+            Tenés {dupes} {dupes === 1 ? "figurita repetida guardada" : "figuritas repetidas guardadas"}.
+            Vendelas y sumá monedas para más sobres.
           </p>
           <button
             type="button"
             onClick={() => sellAllExtras()}
             className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-4 py-2 font-display text-sm tracking-widest text-amber-950 transition hover:brightness-110 active:scale-95"
           >
-            VENDER TODAS · +{extraTotal} 🪙
+            VENDER TODAS · 5-15 <CoinIcon /> POR REPETIDA
           </button>
         </div>
       )}

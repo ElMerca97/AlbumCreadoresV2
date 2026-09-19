@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import type { Sticker } from "@/data/stickers";
 import { STAT_KEYS } from "@/data/stickers";
-import { SELL_VALUE, rarityTheme, statColor } from "@/lib/rarity";
+import { rarityTheme, statColor } from "@/lib/rarity";
 import { useAlbumStore } from "@/store/albumStore";
 import { cn } from "@/utils/cn";
+import CoinIcon from "./CoinIcon";
 import StickerCard from "./StickerCard";
 
 type Props = {
@@ -129,7 +130,7 @@ export default function CardModal({ sticker, onClose }: Props) {
                   onClick={onSell}
                   className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-4 py-3 font-display text-base tracking-widest text-amber-950 transition hover:brightness-110 active:scale-95"
                 >
-                  VENDER REPETIDA · {SELL_VALUE[sticker.rarity]}🪙
+                  VENDER REPETIDA · 5-15 <CoinIcon />
                 </button>
               )}
             </div>

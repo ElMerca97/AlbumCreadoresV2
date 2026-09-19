@@ -20,6 +20,8 @@ export type LeagueState = {
   addFixture: (f: Omit<Fixture, "id">) => void;
   removeFixture: (id: string) => void;
   resetLeague: () => void;
+  /** Deja el Fixture en 0-0: borra goles de todos los partidos y la tabla queda en 0. */
+  resetFixture: () => void;
 };
 
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -76,11 +78,50 @@ export const useLeagueStore = create<LeagueState>()(
 
       resetLeague: () =>
         set({ teams: DEFAULT_TEAMS.map((t) => ({ ...t })), fixtures: DEFAULT_FIXTURES.map((f) => ({ ...f })) }),
+
+      /** Fixture 0-0: quita goles de todos los partidos y recalcula la tabla a 0. */
+      resetFixture: () =>
+        set((s) => {
+          const fixtures = s.fixtures.map((f) => ({ ...f, homeGoals: undefined, awayGoals: undefined }));
+          return { fixtures, teams: recalcFromFixtures(s.teams, fixtures) };
+        }),
     }),
     {
       name: "maldonadocards:liga",
-      version: 1,
+      // v2: el Fixture arranca limpio (todos los partidos sin jugar, tabla en 0).
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      // Limpia SOLO los datos de la liga persistidos (goles y estadísticas de la
+      // tabla). No toca álbum, monedas, cromos, códigos, Mi Equipo ni amistosos:
+      // esos viven en otras claves de localStorage.
+      migrate: (persisted) => {
+        if (!persisted || typeof persisted !== "object") return persisted;
+        const p = persisted as {
+          teams?: unknown;
+          fixtures?: unknown;
+          admin?: unknown;
+        };
+        const cleanFixtures = Array.isArray(p.fixtures)
+          ? (p.fixtures as Fixture[]).map((f) => ({ ...f, homeGoals: undefined, awayGoals: undefined }))
+          : DEFAULT_FIXTURES.map((f) => ({ ...f }));
+        const cleanTeams = Array.isArray(p.teams)
+          ? (p.teams as TeamRow[]).map((t) => ({
+              ...t,
+              pj: 0,
+              pg: 0,
+              pe: 0,
+              pp: 0,
+              gf: 0,
+              gc: 0,
+            }))
+          : DEFAULT_TEAMS.map((t) => ({ ...t }));
+        return {
+          ...persisted,
+          fixtures: cleanFixtures,
+          teams: recalcFromFixtures(cleanTeams, cleanFixtures),
+          admin: typeof p.admin === "boolean" ? p.admin : false,
+        };
+      },
       partialize: (s) => ({ teams: s.teams, fixtures: s.fixtures, admin: s.admin }),
     },
   ),
