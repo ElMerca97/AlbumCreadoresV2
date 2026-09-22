@@ -88,8 +88,7 @@ export const useLeagueStore = create<LeagueState>()(
     }),
     {
       name: "maldonadocards:liga",
-      // v2: el Fixture arranca limpio (todos los partidos sin jugar, tabla en 0).
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       // Limpia SOLO los datos de la liga persistidos (goles y estadísticas de la
       // tabla). No toca álbum, monedas, cromos, códigos, Mi Equipo ni amistosos:
@@ -101,24 +100,15 @@ export const useLeagueStore = create<LeagueState>()(
           fixtures?: unknown;
           admin?: unknown;
         };
-        const cleanFixtures = Array.isArray(p.fixtures)
-          ? (p.fixtures as Fixture[]).map((f) => ({ ...f, homeGoals: undefined, awayGoals: undefined }))
-          : DEFAULT_FIXTURES.map((f) => ({ ...f }));
-        const cleanTeams = Array.isArray(p.teams)
-          ? (p.teams as TeamRow[]).map((t) => ({
-              ...t,
-              pj: 0,
-              pg: 0,
-              pe: 0,
-              pp: 0,
-              gf: 0,
-              gc: 0,
-            }))
-          : DEFAULT_TEAMS.map((t) => ({ ...t }));
+        // ── Serie 1 oficial: fuerza equipos, fixture y tabla desde cero. ─────────
+        // Reemplaza cualquier dato persistido anterior (ej. "Presión", "5TA A FONDO"
+        // como equipo separado, resultados viejos, fechas viejas) por la nueva Serie 1.
+        const cleanTeams = DEFAULT_TEAMS.map((t) => ({ ...t, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0 }));
+        const cleanFixtures = DEFAULT_FIXTURES.map((f) => ({ ...f }));
         return {
           ...persisted,
+          teams: recalcFromFixtures(cleanTeams, cleanFixtures), // tabla real con Fecha 1 jugada
           fixtures: cleanFixtures,
-          teams: recalcFromFixtures(cleanTeams, cleanFixtures),
           admin: typeof p.admin === "boolean" ? p.admin : false,
         };
       },

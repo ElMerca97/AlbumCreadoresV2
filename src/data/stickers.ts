@@ -1,4 +1,4 @@
-export type Rarity = "COMÚN" | "ÉPICO" | "80'S" | "MODO DIOS" | "ALTERNATIVA" | "ESCUDO";
+export type Rarity = "COMÚN" | "ÉPICO" | "80'S" | "MODO DIOS" | "ALTERNATIVA" | "ESCUDO" | "COURT";
 
 export type Stats = {
   Pase: number;
@@ -22,7 +22,7 @@ export type Sticker = {
   number?: number;
   rating?: number;
   stats?: Stats;
-  type?: "club";
+  type?: "club" | "court";
   club?: string;
 };
 
@@ -102,6 +102,18 @@ export const stickers: Sticker[] = [
   { id: 104, playerId: "Sacachispas", name: "Sacachispas FC", type: "club", club: "Sacachispas FC", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Sacachispas.png", quote: "Pasión que se lleva en cada partido." },
   { id: 105, playerId: "Presion", name: "Presión", type: "club", club: "Presión", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Presion.png", quote: "La presión también forma parte del juego." },
   { id: 106, playerId: "Vikingos", name: "Vikingos", type: "club", club: "Vikingos", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Vikingos.png", quote: "Fuerza, identidad y pasión." },
+
+  // ───────────────────────── CANCHAS ─────────────────────────
+  {
+    id: 200,
+    playerId: "CanchaLiffa",
+    name: "Cancha Liffa",
+    version: "COURT",
+    rarity: "COURT",
+    image: "/images/Cancha/CanchaLiffa.png",
+    quote: "Calidad garantizada y el mejor 3er tiempo.",
+    type: "court",
+  },
 ];
 
 /** Colecciones (secciones del álbum) en orden. */
@@ -112,6 +124,16 @@ export const SECTIONS: { version: string; short: string; blurb: string }[] = [
   { version: "MODO DIOS", short: "MODO DIOS", blurb: "El nivel más alto del universo." },
   { version: "ALTERNATIVA", short: "ALTERNATIVA", blurb: "Versiones paralelas e imposibles." },
   { version: "ESCUDOS", short: "ESCUDOS", blurb: "Los clubes y sus identidades." },
+  { version: "COURT", short: "CANCHAS", blurb: "Especiales del álbum." },
 ];
 
 export const bySection = (version: string) => stickers.filter((s) => s.version === version);
+
+export const COURT_STICKER_ID = 200;
+export const COURT_STICKERS = stickers.filter((s) => s.type === "court");
+export const PLAYABLE_STICKERS = stickers.filter((s) => s.type !== "court");
+
+export const CANCHA_LIFFA_ID = COURT_STICKER_ID;
+
+export const CANCHA_LIFFA: Sticker = stickers.find((s) => s.id === COURT_STICKER_ID)!;
+

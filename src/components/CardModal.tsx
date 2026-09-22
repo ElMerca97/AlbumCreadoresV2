@@ -61,13 +61,17 @@ export default function CardModal({ sticker, onClose }: Props) {
                 t.badge,
               )}
             >
-              {sticker.version}
+              {sticker.type === "court" ? "CANCHA" : sticker.version}
             </span>
             <h2 className="mt-3 font-display text-3xl leading-none tracking-wide text-ink sm:text-4xl">
               {sticker.name}
             </h2>
             <p className="mt-1 text-sm text-dim">
-              {sticker.type === "club" ? sticker.club : `${sticker.team} · ${sticker.pos} · Nº ${sticker.number}`}
+              {sticker.type === "club"
+                ? sticker.club
+                : sticker.type === "court"
+                  ? `Cancha · Especial · Nº ${sticker.id}`
+                  : `${sticker.team} · ${sticker.pos} · Nº ${sticker.number}`}
             </p>
 
             <p className="mt-4 border-l-2 border-amber-400/70 pl-3 text-sm italic text-dim">
@@ -109,9 +113,17 @@ export default function CardModal({ sticker, onClose }: Props) {
                 </div>
               </div>
             ) : (
-              <p className="mt-6 text-sm text-dim">
-                Figurita especial de club: no tiene estadísticas, pero vale igual que una
-                leyenda para completar el álbum.
+              <p
+                className={cn(
+                  "text-dim",
+                  sticker.type === "court"
+                    ? "mt-7 max-w-prose text-base leading-relaxed sm:text-lg"
+                    : "mt-6 text-sm",
+                )}
+              >
+                {sticker.type === "court"
+                  ? "Aquí se entrenan y se forjan las historias de la Selección de Creadores. Canchas de calidad, un equipo humano excepcional y una cantina que forma parte de la experiencia. Un lugar legendario donde cada partido, oficial o amistoso, se convierte en un recuerdo."
+                  : "Figurita especial de club: no tiene estadísticas, pero vale igual que una leyenda para completar el álbum."}
               </p>
             )}
 

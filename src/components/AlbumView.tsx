@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { SECTIONS, stickers, type Sticker } from "@/data/stickers";
+import { stickers, type Sticker } from "@/data/stickers";
 import { useAlbumStore, useAlbumStats, useOwnedSet } from "@/store/albumStore";
 import { useUIStore } from "@/store/uiStore";
 import { cn } from "@/utils/cn";
 import CoinIcon from "./CoinIcon";
 import StickerCard from "./StickerCard";
+import { SECTIONS } from "@/data/stickers";
 
 /** Splits de cada hoja del álbum: [izquierda, derecha, checklist] */
 function pageLayout(version: string) {
@@ -29,7 +30,7 @@ function EmptySlot({ sticker, onClick }: { sticker: Sticker; onClick: () => void
             {sticker.id}
           </span>
           <span className="mt-0.5 line-clamp-2 text-[7px] leading-tight font-semibold tracking-wide text-[#7a6337]/55 uppercase sm:text-[8px]">
-            {sticker.type === "club" ? sticker.club : sticker.name}
+            {sticker.type === "club" ? sticker.club : sticker.type === "court" ? "CANCHA" : sticker.name}
           </span>
           <span className="mt-1 font-display text-[8px] tracking-[0.2em] text-[#7a6337]/45">
             {sticker.rarity}
@@ -62,7 +63,7 @@ function Checklist({
           LISTA DE CONTROL
         </p>
         <h4 className="font-display text-xl leading-none tracking-wide text-[#4a3a1c] sm:text-2xl">
-          {version}
+          {SECTIONS.find((s) => s.version === version)?.short.toUpperCase()}
         </h4>
         <p className="mt-1 font-display text-xs tracking-widest text-[#7a6337]">
           {got}/{list.length} PEGADAS
@@ -548,7 +549,7 @@ function GridAlbum({
             <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
               <div>
                 <h3 className="font-display text-2xl tracking-wide text-ink sm:text-3xl">
-                  {sec.version}
+                  {sec.short.toUpperCase()}
                 </h3>
                 <p className="text-xs text-faint">{sec.blurb}</p>
               </div>

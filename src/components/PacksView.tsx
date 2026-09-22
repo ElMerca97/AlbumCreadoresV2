@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { stickers, type Rarity, type Sticker } from "@/data/stickers";
+import { CANCHA_LIFFA, stickers, type Rarity, type Sticker } from "@/data/stickers";
+import { imageUrl } from "@/lib/images";
 import { useAlbumStore, useOwnedSet } from "@/store/albumStore";
 import { cn } from "@/utils/cn";
 import StickerCard from "./StickerCard";
@@ -233,6 +234,16 @@ function packOdds(p: PackDef): string {
     .join(" · ");
 }
 
+/**
+ * Probabilidad independiente de obtener un cromo especial de cancha (Cancha Liffa)
+ * por sobre abierto. No afecta las probabilidades normales de cada rareza.
+ */
+const COURT_PACK_CHANCE: Record<string, number> = {
+  plata: 0.05,
+  oro: 0.07,
+  creadores: 0.1,
+};
+
 function drawPack(pack: PackDef, owned: Set<number>): Sticker[] {
   const out: Sticker[] = [];
   for (const g of pack.guarantee) out.push(drawFrom(g, owned));
@@ -242,6 +253,17 @@ function drawPack(pack: PackDef, owned: Set<number>): Sticker[] {
     if (out.filter((c) => c.id === card.id).length >= 2) continue;
     out.push(card);
   }
+
+  // Cancha Liffa entra como posibilidad independiente, reemplazando como máximo
+  // UNA carta NO garantizada (nunca agrega cromos ni rompe garantías).
+  const chance = COURT_PACK_CHANCE[pack.id] ?? 0;
+  if (chance > 0 && !out.some((c) => c.type === "court") && Math.random() < chance) {
+    const free = out.map((_, i) => i).filter((i) => i >= pack.guarantee.length);
+    if (free.length > 0) {
+      out[free[Math.floor(Math.random() * free.length)]] = CANCHA_LIFFA;
+    }
+  }
+
   return out;
 }
 
@@ -249,7 +271,7 @@ function CardBack({ pack }: { pack: PackDef }) {
   return (
     <div className="h-full w-full overflow-hidden">
       <img
-        src={pack.image}
+        src={imageUrl(pack.image)}
         alt={pack.name}
         className="h-full w-full object-cover"
       />

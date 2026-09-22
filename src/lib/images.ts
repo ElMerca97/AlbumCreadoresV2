@@ -12,15 +12,42 @@ import { useEffect, useState } from "react";
  */
 export const IMAGES_ROOT: string = "";
 
+/**
+ * Versión global de las imágenes servidas desde `public/images`.
+ *
+ * Sirve para cuando reemplazás un archivo sin cambiarle el nombre (por ejemplo
+ * `public/images/stickers/Dios/MatuteDios.png`): el navegador, Vite y los CDN
+ * pueden seguir devolviendo la copia cacheada porque la URL es la misma. Al subir
+ * este número, todas las URLs pasan a pedirse como `...png?v=N`, que es una clave
+ * de caché distinta, así se descarga el archivo actualizado.
+ *
+ * Es un valor FIJO a propósito (no `Date.now()` ni random): mientras no lo
+ * cambies, la URL es idéntica entre renderizados y entre recargas, así que el
+ * navegador reutiliza su caché y no vuelve a bajar imágenes que no cambiaron.
+ *
+ * Cómo usarlo: reemplazá las imágenes y cambiá "1" por "2" (y así sucesivamente).
+ * No hay que tocar ningún sticker: todas las rutas pasan por `imageUrl()`.
+ */
+export const IMAGE_VERSION = "1";
+
+/** Sufijo de versión que se agrega a cada URL de imagen (vacío si no hay versión). */
+function imageVersionQuery() {
+  return IMAGE_VERSION ? `?v=${IMAGE_VERSION}` : "";
+}
+
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 
 export const stripAccents = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-/** Une la raíz con la ruta del array y la codifica para URL. */
+/**
+ * Une la raíz con la ruta del array, la codifica para URL y le agrega la versión
+ * global (`?v=IMAGE_VERSION`). Es el único punto donde se construyen las URLs de
+ * `public/images`, así que cambiar `IMAGE_VERSION` refresca todas a la vez.
+ */
 export function imageUrl(path: string) {
   const clean = path.replace(/^\/+/, "");
   const root = IMAGES_ROOT ? IMAGES_ROOT.replace(/\/?$/, "/") : "";
-  return encodeURI(root + clean);
+  return encodeURI(root + clean) + imageVersionQuery();
 }
 
 /**

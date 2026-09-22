@@ -1,4 +1,8 @@
+import { imageUrl } from "@/lib/images";
 import { cn } from "@/utils/cn";
+
+/** Icono oficial de CreaCoins (`public/images/otros/moneda.png`), versionado. */
+const COIN_SRC = imageUrl("images/otros/moneda.png");
 
 type Props = {
   className?: string;
@@ -11,7 +15,7 @@ type Props = {
 export default function CoinIcon({ className }: Props) {
   return (
     <img
-      src="images/otros/moneda.png"
+      src={COIN_SRC}
       alt="CreaCoins"
       draggable={false}
       loading="lazy"

@@ -16,6 +16,20 @@ export type RarityTheme = {
 };
 
 export const RARITY: Record<Rarity, RarityTheme> = {
+  "COURT": {
+    name: "COURT",
+    frame: "from-teal-400 via-emerald-400 to-lime-400",
+    frameText: "text-emerald-950",
+    body: "from-teal-50 via-emerald-50 to-lime-50",
+    accentText: "text-teal-800",
+    chip: "bg-teal-900/10 text-teal-900 border-teal-900/20",
+    glow: "shadow-[0_8px_24px_-10px_rgba(45,197,120,0.7)]",
+    ring: "ring-teal-400/60",
+    holo: false,
+    scanlines: false,
+    initials: "from-teal-200 via-emerald-100 to-lime-200",
+    badge: "bg-teal-900 text-white",
+  },
   "COMÚN": {
     name: "COMÚN",
     frame: "from-slate-200 via-white to-slate-400",
@@ -106,6 +120,7 @@ export const rarityTheme = (s: Sticker): RarityTheme => RARITY[s.rarity] ?? RARI
 
 /** Valor de venta / recompensa por repetida. */
 export const SELL_VALUE: Record<Rarity, number> = {
+  "COURT": 60,
   "COMÚN": 25,
   "ÉPICO": 90,
   "80'S": 150,
