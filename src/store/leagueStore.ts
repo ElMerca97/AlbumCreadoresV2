@@ -88,7 +88,7 @@ export const useLeagueStore = create<LeagueState>()(
     }),
     {
       name: "maldonadocards:liga",
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       // Limpia SOLO los datos de la liga persistidos (goles y estadísticas de la
       // tabla). No toca álbum, monedas, cromos, códigos, Mi Equipo ni amistosos:
@@ -102,12 +102,13 @@ export const useLeagueStore = create<LeagueState>()(
         };
         // ── Serie 1 oficial: fuerza equipos, fixture y tabla desde cero. ─────────
         // Reemplaza cualquier dato persistido anterior (ej. "Presión", "5TA A FONDO"
-        // como equipo separado, resultados viejos, fechas viejas) por la nueva Serie 1.
+        // como equipo separado, resultados viejos, fechas viejas) por la nueva Serie 1
+        // con las Fechas 1 y 2 ya jugadas.
         const cleanTeams = DEFAULT_TEAMS.map((t) => ({ ...t, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0 }));
         const cleanFixtures = DEFAULT_FIXTURES.map((f) => ({ ...f }));
         return {
           ...persisted,
-          teams: recalcFromFixtures(cleanTeams, cleanFixtures), // tabla real con Fecha 1 jugada
+          teams: recalcFromFixtures(cleanTeams, cleanFixtures), // tabla real con Fechas 1 y 2 jugadas
           fixtures: cleanFixtures,
           admin: typeof p.admin === "boolean" ? p.admin : false,
         };

@@ -65,19 +65,21 @@ export function fmtDate(iso: string) {
   return `${d} ${MONTHS[m - 1]} ${y !== new Date().getFullYear() ? y : ""}`.trim();
 }
 
+/** Tabla de posiciones oficial tras la Fecha 2 (26/09/2026).
+ * `computeStandings` calcula puntos y diferencia de gol a partir de estas filas. */
 export const DEFAULT_TEAMS: TeamRow[] = [
-  { id: "carolino", name: "Carolino", short: "CAROLINO", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "chiveo", name: "Chiveo", short: "CHIVEO", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "maldonado", name: "Maldonado Creadores", short: "MALDONADO CREADORES", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "mazzoni", name: "Mazzoni", short: "MAZZONI", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "quintaafondo", name: "5TA A FONDO", short: "5TA A FONDO", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "sacachispas", name: "Sacachispas", short: "SACACHISPAS", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
-  { id: "vikingos", name: "Vikingos", short: "VIKINGOS", pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 },
+  { id: "carolino", name: "Carolino", short: "CAROLINO", pj: 2, pg: 0, pe: 0, pp: 2, gf: 0, gc: 13 },
+  { id: "chiveo", name: "Chiveo", short: "CHIVEO", pj: 1, pg: 0, pe: 0, pp: 1, gf: 2, gc: 8 },
+  { id: "maldonado", name: "Maldonado Creadores", short: "MALDONADO CREADORES", pj: 1, pg: 0, pe: 0, pp: 1, gf: 1, gc: 4 },
+  { id: "mazzoni", name: "Mazzoni", short: "MAZZONI", pj: 2, pg: 2, pe: 0, pp: 0, gf: 15, gc: 3 },
+  { id: "quintaafondo", name: "5TA A FONDO", short: "5TA A FONDO", pj: 2, pg: 1, pe: 0, pp: 1, gf: 5, gc: 5 },
+  { id: "sacachispas", name: "Sacachispas", short: "SACACHISPAS", pj: 2, pg: 2, pe: 0, pp: 0, gf: 14, gc: 1 },
+  { id: "vikingos", name: "Vikingos", short: "VIKINGOS", pj: 2, pg: 1, pe: 0, pp: 1, gf: 4, gc: 7 },
 ];
 
 /** Fixture inicial Serie 1:
- * - Fecha 1 ya jugada (resultados oficiales registrados).
- * - Fechas 2 a 7 pendientes (sin goles, todos en 0).
+ * - Fechas 1 y 2 ya jugadas (resultados oficiales registrados).
+ * - Fechas 3 a 7 pendientes (sin goles).
  *
  * Los ids de los equipos deben coincidir con `DEFAULT_TEAMS.id`.
  */
@@ -87,10 +89,10 @@ export const DEFAULT_FIXTURES: Fixture[] = [
   { id: "f1-2", home: "sacachispas", away: "carolino", date: "2026-09-19", homeGoals: 10, awayGoals: 0, note: "Fecha 1" },
   { id: "f1-3", home: "vikingos", away: "mazzoni", date: "2026-09-19", homeGoals: 1, awayGoals: 7, note: "Fecha 1" },
 
-  // ── Fecha 2 — 26/09/2026 (pendiente) ────────────────────────────────────────
-  { id: "f2-1", home: "quintaafondo", away: "sacachispas", date: "2026-09-26", note: "Fecha 2" },
-  { id: "f2-2", home: "mazzoni", away: "chiveo", date: "2026-09-26", note: "Fecha 2" },
-  { id: "f2-3", home: "carolino", away: "vikingos", date: "2026-09-26", note: "Fecha 2" },
+  // ── Fecha 2 — 26/09/2026 (jugada) ──────────────────────────────────────────
+  { id: "f2-1", home: "quintaafondo", away: "sacachispas", date: "2026-09-26", homeGoals: 1, awayGoals: 4, note: "Fecha 2" },
+  { id: "f2-2", home: "mazzoni", away: "chiveo", date: "2026-09-26", homeGoals: 8, awayGoals: 2, note: "Fecha 2" },
+  { id: "f2-3", home: "carolino", away: "vikingos", date: "2026-09-26", homeGoals: 0, awayGoals: 3, note: "Fecha 2" },
 
   // ── Fecha 3 — 03/10/2026 (pendiente) ────────────────────────────────────────
   { id: "f3-1", home: "maldonado", away: "chiveo", date: "2026-10-03", note: "Fecha 3" },
