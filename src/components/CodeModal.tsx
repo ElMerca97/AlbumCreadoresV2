@@ -16,7 +16,10 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
 
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
-  const [admin, setAdmin] = useState(false);
+  // Modo admin: única fuente de verdad en el store de la liga, para que el panel
+  // de LeagueView y el panel de este modal se enciendan y apaguen juntos.
+  const admin = useLeagueStore((s) => s.admin);
+  const setAdmin = useLeagueStore((s) => s.setAdmin);
   const [adminCoins, setAdminCoins] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -34,10 +37,18 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // ADMIN97 abre el panel administrador sin consumirse ni entrar en redeemed.
+    // ADMIN97 alterna el modo admin sin consumirse ni entrar en redeemed:
+    // 1ª vez enciende (muestra panel admin, liga editable y REINICIAR),
+    // 2ª vez lo apaga y vuelve todo a la vista normal.
     if (value.trim().toUpperCase().replace(/\s+/g, "") === ADMIN_CODE) {
-      setAdmin(true);
-      setStatus(null);
+      const next = !admin;
+      setAdmin(next);
+      setStatus({
+        ok: true,
+        message: next
+          ? "Modo admin ACTIVADO: la liga y el panel administrador están habilitados."
+          : "Modo admin DESACTIVADO: todo vuelve a estar oculto.",
+      });
       setValue("");
       return;
     }
@@ -92,8 +103,11 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        {admin ? (
-          <div className="p-5 sm:p-6">
+        {/* Panel administrador: solo visible con el modo admin activo (ADMIN97).
+            El formulario de canje de abajo queda SIEMPRE visible para que el mismo
+            código ADMIN97 también pueda apagar el modo. */}
+        {admin && (
+          <div className="border-b border-line p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <p className="font-display text-[10px] tracking-[0.3em] text-rose-400">
                 PANEL ADMINISTRADOR · MODO LOCAL
@@ -102,7 +116,7 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => {
                   setAdmin(false);
-                  setStatus(null);
+                  setStatus({ ok: true, message: "Modo admin DESACTIVADO: todo vuelve a estar oculto." });
                 }}
                 className="rounded-lg border border-line px-2.5 py-1 font-display text-[10px] tracking-widest text-dim transition hover:border-line-strong hover:text-ink"
               >
@@ -112,19 +126,6 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
             <p className="mt-2 text-xs text-dim">
               Herramienta administrativa del proyecto. No es un sistema de seguridad.
             </p>
-
-            {status && (
-              <p
-                className={cn(
-                  "animate-fade-up mt-4 rounded-xl border px-4 py-2.5 text-sm",
-                  status.ok
-                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                    : "border-rose-400/30 bg-rose-400/10 text-rose-300",
-                )}
-              >
-                {status.message}
-              </p>
-            )}
 
             <div className="mt-4 space-y-3">
               <div className="rounded-2xl border border-line bg-panel p-4">
@@ -198,7 +199,8 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
         <form onSubmit={submit} className="p-5 sm:p-6">
           <div className="flex gap-2">
             <input
@@ -243,7 +245,6 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
             </p>
           </div>
         </form>
-        )}
       </div>
     </div>
   );

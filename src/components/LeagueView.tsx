@@ -65,7 +65,6 @@ export default function LeagueView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-         
           {league.admin && (
             <button
               type="button"

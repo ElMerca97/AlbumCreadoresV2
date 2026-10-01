@@ -117,6 +117,12 @@ export const useLeagueStore = create<LeagueState>()(
         };
       },
       partialize: (s) => ({ teams: s.teams, fixtures: s.fixtures, admin: s.admin }),
+      // El modo admin NUNCA se restaura solo: al recargar siempre arranca apagado.
+      // Solo se enciende/apaga con el código ADMIN97 desde el canje de códigos.
+      merge: (persisted, current) => {
+        const p = persisted && typeof persisted === "object" ? (persisted as Partial<LeagueState>) : {};
+        return { ...current, ...p, admin: false } as LeagueState;
+      },
     },
   ),
 );
