@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { CODES } from "@/data/codes";
+import { CODES, ADMIN_CODE } from "@/data/codes";
 import { useAlbumStore } from "@/store/albumStore";
 import { useFriendlyStore } from "@/store/friendlyStore";
 import { useLeagueStore } from "@/store/leagueStore";
 import { cn } from "@/utils/cn";
 import CoinIcon from "./CoinIcon";
-
-/** Código administrativo especial: abre el panel admin y NUNCA se consume. */
-const ADMIN_CODE = "ADMIN97";
 
 export default function CodeModal({ onClose }: { onClose: () => void }) {
   const redeem = useAlbumStore((s) => s.redeem);
@@ -19,7 +16,6 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
 
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
-  const [reveal, setReveal] = useState<string | null>(null);
   const [admin, setAdmin] = useState(false);
   const [adminCoins, setAdminCoins] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,10 +43,7 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
     }
     const res = redeem(value);
     setStatus({ ok: res.ok, message: res.message });
-    if (res.ok) {
-      setValue("");
-      setReveal(null);
-    }
+    if (res.ok) setValue("");
   };
 
   /** Panel admin: agrega CreaCoins con el addCoins() existente. */
@@ -95,8 +88,7 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
             CARGÁ TU CÓDIGO
           </h2>
           <p className="mt-2 text-sm text-dim">
-            Tocá las monedas cuando quieras para volver acá. Cada código se puede usar una sola vez
-            por navegador.
+            Donde conseguir los codigos? Sigue a los jugadores en sus redes sociales y preguntales o ve a verlos en la cancha!.
           </p>
         </div>
 
@@ -213,10 +205,10 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
               ref={inputRef}
               value={value}
               onChange={(e) => {
-                setValue(e.target.value.toUpperCase());
+                setValue(e.target.value);
                 setStatus(null);
               }}
-              placeholder="MALDONADO10"
+              placeholder="elmerca40"
               spellCheck={false}
               autoComplete="off"
               className="min-w-0 flex-1 rounded-xl border border-line bg-panel px-4 py-3 font-display text-lg tracking-[0.2em] text-ink placeholder:text-faint focus:border-amber-400/70 focus:outline-none"
@@ -244,54 +236,12 @@ export default function CodeModal({ onClose }: { onClose: () => void }) {
 
           <div className="mt-5 flex items-center justify-between">
             <p className="font-display text-[10px] tracking-[0.25em] text-faint">
-              PISTAS · {redeemed.length}/{CODES.length} USADOS
+              CÓDIGOS · {redeemed.length}/{CODES.length} USADOS
             </p>
             <p className="font-display text-sm tracking-widest text-amber-400">
               {coins} <CoinIcon />
             </p>
           </div>
-
-          <ul className="mt-2 max-h-64 space-y-1.5 overflow-y-auto pr-1">
-            {CODES.map((c) => {
-              const used = redeemed.includes(c.code);
-              const open = reveal === c.code;
-              return (
-                <li
-                  key={c.code}
-                  className="flex items-center gap-3 rounded-xl border border-line bg-panel px-3 py-2"
-                >
-                  <span
-                    className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px]",
-                      used
-                        ? "bg-emerald-400/20 text-emerald-400"
-                        : "bg-panel-2 text-faint",
-                    )}
-                  >
-                    {used ? "✓" : "?"}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs text-dim">{c.hint}</p>
-                    <p
-                      className={cn(
-                        "font-display text-sm tracking-[0.15em] transition",
-                        open ? "text-amber-400" : "text-faint blur-[5px] select-none",
-                      )}
-                    >
-                      {c.code}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setReveal(open ? null : c.code)}
-                    className="shrink-0 rounded-lg border border-line px-2.5 py-1 font-display text-[10px] tracking-widest text-dim transition hover:border-line-strong hover:text-ink"
-                  >
-                    {open ? "OCULTAR" : "VER"}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
         </form>
         )}
       </div>

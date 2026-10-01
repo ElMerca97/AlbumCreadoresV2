@@ -44,6 +44,9 @@ export function recalcFromFixtures(teams: TeamRow[], fixtures: Fixture[]): TeamR
   for (const t of teams) acc.set(t.id, { ...t, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 });
   for (const f of fixtures) {
     if (f.homeGoals == null || f.awayGoals == null) continue;
+    // Un equipo no puede jugar contra sí mismo: si pasa por un error de carga, el
+    // partido se ignora (antes se contaban dos veces los goles en la misma fila).
+    if (f.home === f.away) continue;
     const h = acc.get(f.home);
     const a = acc.get(f.away);
     if (!h || !a) continue;

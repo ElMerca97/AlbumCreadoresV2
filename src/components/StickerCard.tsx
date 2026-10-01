@@ -57,10 +57,26 @@ export default function StickerCard({
       ) : (
         <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-400 px-2 text-center">
           <div className="absolute inset-0 opacity-20 [background:repeating-linear-gradient(45deg,rgba(255,255,255,.8)_0_10px,transparent_10px_20px)]" />
-          <span className="relative font-display text-4xl text-slate-600/40">{locked ? "?" : "…"}</span>
-          <span className="relative mt-1 font-display text-[8px] tracking-[0.16em] text-slate-600/70">
-            {locked ? "FALTA" : "CARGANDO"}
-          </span>
+          {image.status === "missing" ? (
+            // Todavía no existe el .png (por ejemplo, las LEYENDAS recién
+            // agregadas): en vez de quedarse en "CARGANDO" para siempre,
+            // avisamos que la imagen viene después.
+            <>
+              <span className="relative max-w-full font-display text-[9px] leading-tight tracking-[0.14em] text-slate-600/70 sm:text-[11px]">
+                PRÓXIMAMENTE
+              </span>
+              <span className="relative mt-1 line-clamp-2 max-w-full text-[7px] font-semibold uppercase leading-tight tracking-wide text-slate-600/55 sm:text-[8px]">
+                {sticker.name}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="relative font-display text-4xl text-slate-600/40">{locked ? "?" : "…"}</span>
+              <span className="relative mt-1 font-display text-[8px] tracking-[0.16em] text-slate-600/70">
+                {locked ? "FALTA" : "CARGANDO"}
+              </span>
+            </>
+          )}
         </div>
       )}
 

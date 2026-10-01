@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import type { Sticker } from "@/data/stickers";
 import { STAT_KEYS } from "@/data/stickers";
+import { instagramUrl } from "@/data/redes";
+import { imageUrl } from "@/lib/images";
 import { rarityTheme, statColor } from "@/lib/rarity";
 import { useAlbumStore } from "@/store/albumStore";
 import { cn } from "@/utils/cn";
@@ -14,6 +16,8 @@ type Props = {
 
 export default function CardModal({ sticker, onClose }: Props) {
   const t = rarityTheme(sticker);
+  // //redes// — Instagram del titular del cromo; null si no hay URL cargada.
+  const ig = instagramUrl(sticker.playerId);
   const owned = useAlbumStore((s) => s.owned.includes(sticker.id));
   const extra = useAlbumStore((s) => s.extras[sticker.id] ?? 0);
   const sellExtra = useAlbumStore((s) => s.sellExtra);
@@ -52,6 +56,32 @@ export default function CardModal({ sticker, onClose }: Props) {
             <div className="aspect-[2/3]">
               <StickerCard sticker={sticker} locked={!owned} extra={extra} />
             </div>
+
+            {/* //redes// — Íconos debajo del cromo. Se ocultan si no hay URL
+                cargada en src/data/redes.ts. Acá se suman las próximas redes. */}
+            {ig && (
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <span className="font-display text-[10px] tracking-[0.25em] text-faint">
+                  REDES
+                </span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={ig}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Instagram"
+                    aria-label="Instagram"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-panel-2 transition hover:bg-line-strong active:scale-95"
+                  >
+                    <img
+                      src={imageUrl("images/Logos/instagram.png")}
+                      alt="Instagram"
+                      className="h-5 w-5 object-contain"
+                    />
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col">
@@ -71,7 +101,9 @@ export default function CardModal({ sticker, onClose }: Props) {
                 ? sticker.club
                 : sticker.type === "court"
                   ? `Cancha · Especial · Nº ${sticker.id}`
-                  : `${sticker.team} · ${sticker.pos} · Nº ${sticker.number}`}
+                  : sticker.stats && sticker.pos
+                    ? `${sticker.team} · ${sticker.pos} · Nº ${sticker.number}`
+                    : `${sticker.team} · Figurita decorativa · Nº ${sticker.id}`}
             </p>
 
             <p className="mt-4 border-l-2 border-amber-400/70 pl-3 text-sm italic text-dim">
@@ -123,7 +155,9 @@ export default function CardModal({ sticker, onClose }: Props) {
               >
                 {sticker.type === "court"
                   ? "Aquí se entrenan y se forjan las historias de la Selección de Creadores. Canchas de calidad, un equipo humano excepcional y una cantina que forma parte de la experiencia. Un lugar legendario donde cada partido, oficial o amistoso, se convierte en un recuerdo."
-                  : "Figurita especial de club: no tiene estadísticas, pero vale igual que una leyenda para completar el álbum."}
+                  : sticker.stats
+                    ? "Figurita especial de club: no tiene estadísticas, pero vale igual que una leyenda para completar el álbum."
+                    : "Leyenda del plantel. Figurita decorativa: no tiene posición ni estadísticas, así que no se juega en Mi Equipo ni en los amistosos, pero suma para completar el álbum."}
               </p>
             )}
 

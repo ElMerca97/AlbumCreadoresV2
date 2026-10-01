@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CANCHA_LIFFA, stickers, type Rarity, type Sticker } from "@/data/stickers";
 import { imageUrl } from "@/lib/images";
 import { useAlbumStore, useOwnedSet } from "@/store/albumStore";
@@ -157,7 +157,9 @@ export const PACKS: PackDef[] = [
     guarantee: [],
     filler: [
       // Promedio simple de Retro, Modo Dios, Alternativa y Mega Sobre.
-      { rarity: "COMÚN", w: 0.1270833 },
+      // El 2% de COMÚN se reinvierte en LEGENDA (≈1 de cada 10 sobres de Oro).
+      { rarity: "LEGENDA", w: 0.12 },
+      { rarity: "COMÚN", w: 0.1070833 },
       { rarity: "ÉPICO", w: 0.215625 },
       { rarity: "ESCUDO", w: 0.028125 },
       { rarity: "80'S", w: 0.2291667 },
@@ -176,7 +178,9 @@ export const PACKS: PackDef[] = [
     guarantee: [],
     filler: [
       // Un paso por encima de Oro: más rarezas altas, sin un salto exagerado.
-      { rarity: "COMÚN", w: 0.08 },
+      // El 4% de COMÚN se reinvierte en LEGENDA (≈1 de cada 4 sobres Creadores).
+      { rarity: "LEGENDA", w: 0.04 },
+      { rarity: "COMÚN", w: 0.04 },
       { rarity: "ÉPICO", w: 0.22 },
       { rarity: "ESCUDO", w: 0.02 },
       { rarity: "80'S", w: 0.24 },
@@ -191,11 +195,22 @@ export const PACKS: PackDef[] = [
 
 const poolOf = (r: Rarity) => stickers.filter((s) => s.rarity === r);
 
+/**
+ * Suma de pesos de un filler. Puede no ser exactamente 1 (los pesos de los
+ * sobres vienen de promedios), así que SIEMPRE se normaliza antes de sortear:
+ * con la suma cruda, un filler que suma 1.1 sesgaba los últimos rubros
+ * (ej. Sobre de Oro: ALTERNATIVA bajaba de ~16.7% a ~6.7%).
+ */
+const totalWeight = (filler: Weight[]) =>
+  filler.reduce((a, f) => a + Math.max(0, f.w), 0);
+
 function pickWeighted(filler: Weight[]): Rarity {
-  const r = Math.random();
+  const total = totalWeight(filler);
+  if (total <= 0) return filler[filler.length - 1].rarity;
+  const r = Math.random() * total;
   let acc = 0;
   for (const f of filler) {
-    acc += f.w;
+    acc += Math.max(0, f.w);
     if (r <= acc) return f.rarity;
   }
   return filler[filler.length - 1].rarity;
@@ -214,6 +229,7 @@ function drawFrom(rarity: Rarity, owned: Set<number>): Sticker {
 
 /** Probabilidades por rareza dentro de un sobre (para mostrar en la tienda). */
 const RARITY_ORDER: Rarity[] = [
+  "LEGENDA",
   "MODO DIOS",
   "ALTERNATIVA",
   "80'S",
@@ -226,8 +242,11 @@ function packOdds(p: PackDef): string {
   const counts = new Map<Rarity, number>();
   for (const g of p.guarantee) counts.set(g, (counts.get(g) ?? 0) + 1);
   const rest = Math.max(0, p.count - p.guarantee.length);
-  for (const f of p.filler) {
-    counts.set(f.rarity, (counts.get(f.rarity) ?? 0) + f.w * rest);
+  const total = totalWeight(p.filler);
+  if (total > 0) {
+    for (const f of p.filler) {
+      counts.set(f.rarity, (counts.get(f.rarity) ?? 0) + (Math.max(0, f.w) / total) * rest);
+    }
   }
   return RARITY_ORDER.filter((r) => (counts.get(r) ?? 0) > 0.05)
     .map((r) => `${r} ${Math.round(((counts.get(r) ?? 0) / p.count) * 100)}%`)
@@ -244,13 +263,32 @@ const COURT_PACK_CHANCE: Record<string, number> = {
   creadores: 0.1,
 };
 
+/** Máximo de copias de la MISMA figurita dentro de un sobre. */
+const MAX_COPIES_PER_PACK = 2;
+/**
+ * Reintentos seguidos antes de relajar ese tope.
+ *
+ * Necesario porque una rareza con pocas figuritas (por ejemplo ALTERNATIVA, que
+ * tiene 2) puede quedarse sin cartas disponibles: con el `continue` original el
+ * `while` no terminaba nunca y la app se congelaba.
+ */
+const MAX_BLOCKED_TRIES = 60;
+
 function drawPack(pack: PackDef, owned: Set<number>): Sticker[] {
   const out: Sticker[] = [];
   for (const g of pack.guarantee) out.push(drawFrom(g, owned));
+
+  let blocked = 0;
   while (out.length < pack.count) {
     const rarity = pickWeighted(pack.filler);
     const card = drawFrom(rarity, owned);
-    if (out.filter((c) => c.id === card.id).length >= 2) continue;
+    if (out.filter((c) => c.id === card.id).length >= MAX_COPIES_PER_PACK) {
+      if (blocked < MAX_BLOCKED_TRIES) {
+        blocked++;
+        continue;
+      }
+    }
+    blocked = 0;
     out.push(card);
   }
 
@@ -305,14 +343,37 @@ export default function PacksView({ onOpenCard }: Props) {
   const [pulled, setPulled] = useState<{ sticker: Sticker; isNew: boolean }[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [reward, setReward] = useState<{ fresh: number[]; gained: number } | null>(null);
+  /**
+   * Sobre ya abierto y todavía sin guardar (ids + costo). Si el usuario cambia de
+   * pestaña, este componente se desmonta: sin esto se perdían las monedas gastadas
+   * y las cartas.
+   */
+  const pendingRef = useRef<{ ids: number[]; cost: number } | null>(null);
+
+  // Al desmontar, el sobre pendiente se cobra y se pega igual (una sola vez).
+  useEffect(
+    () => () => {
+      const pending = pendingRef.current;
+      if (!pending) return;
+      pendingRef.current = null;
+      onSpend(-pending.cost);
+      onAdd(pending.ids);
+      onPacks(1);
+    },
+    [onAdd, onPacks, onSpend],
+  );
 
   const canAfford = (p: PackDef) => coins >= p.cost;
   const allFlipped = pulled.length > 0 && flipped.length === pulled.length;
+  /** Repetidas que quedaron guardadas en este sobre (las nuevas son `reward.fresh`). */
+  const packRepeats = reward ? pulled.length - reward.fresh.length : 0;
 
   const openPack = (p: PackDef) => {
     if (!canAfford(p)) return;
-    onSpend(-p.cost);
+    // Las monedas se cobran al GUARDAR (o al desmontar): así, si el usuario cierra
+    // la página durante el revelado, no pierde el sobre.
     const cards = drawPack(p, ownedSet);
+    pendingRef.current = { ids: cards.map((sticker) => sticker.id), cost: p.cost };
     setPack(p);
     setPulled(cards.map((sticker) => ({ sticker, isNew: !ownedSet.has(sticker.id) })));
     setFlipped([]);
@@ -323,8 +384,10 @@ export default function PacksView({ onOpenCard }: Props) {
 
   const save = () => {
     if (!pack) return;
+    onSpend(-pack.cost);
     const res = onAdd(pulled.map((p) => p.sticker.id));
     onPacks(1);
+    pendingRef.current = null;
     setReward(res);
     setPhase("saved");
   };
@@ -383,7 +446,10 @@ export default function PacksView({ onOpenCard }: Props) {
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {pulled.map((p, i) => {
                 const isFlipped = flipped.includes(i);
-                const best = p.sticker.rarity === "MODO DIOS" || p.sticker.rarity === "ALTERNATIVA";
+                const best =
+                  p.sticker.rarity === "MODO DIOS" ||
+                  p.sticker.rarity === "ALTERNATIVA" ||
+                  p.sticker.rarity === "LEGENDA";
                 return (
                   <div
                     key={`${p.sticker.id}-${i}`}
@@ -428,10 +494,12 @@ export default function PacksView({ onOpenCard }: Props) {
                 </div>
                 <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
                   <p className="font-display text-xl tracking-widest text-amber-300">
-                    +{reward.gained} <CoinIcon /> EN REPETIDAS
+                    {packRepeats} REPETIDA{packRepeats === 1 ? "" : "S"} GUARDADA
+                    {packRepeats === 1 ? "" : "S"}
                   </p>
                   <p className="mt-1 text-sm text-amber-100/80">
-                    Las repetidas se guardan para vender cuando quieras.
+                    Las repetidas se guardan en el álbum para venderlas (5-15 <CoinIcon /> cada
+                    una) cuando quieras.
                   </p>
                 </div>
               </div>

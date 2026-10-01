@@ -54,10 +54,13 @@ export const useLeagueStore = create<LeagueState>()(
       },
 
       removeTeam: (id) =>
-        set((s) => ({
-          teams: s.teams.filter((t) => t.id !== id),
-          fixtures: s.fixtures.filter((f) => f.home !== id && f.away !== id),
-        })),
+        set((s) => {
+          const teams = s.teams.filter((t) => t.id !== id);
+          const fixtures = s.fixtures.filter((f) => f.home !== id && f.away !== id);
+          // Recalcula la tabla: sin este paso, los partidos jugados contra el
+          // equipo borrado seguían contando en PJ/PG/GF/GC de los demás.
+          return { teams: recalcFromFixtures(teams, fixtures), fixtures };
+        }),
 
       updateFixture: (id, patch) =>
         set((s) => {

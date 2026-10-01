@@ -30,6 +30,7 @@ export default function LeagueView() {
   const [adminTab, setAdminTab] = useState<AdminTab>("tabla");
   const [newTeam, setNewTeam] = useState("");
   const [newFixture, setNewFixture] = useState({ home: "", away: "", date: "" });
+  const [fixtureError, setFixtureError] = useState("");
 
   const standings = useMemo(() => computeStandings(league.teams), [league.teams]);
   const upcoming = useMemo(
@@ -64,18 +65,7 @@ export default function LeagueView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => league.setAdmin(!league.admin)}
-            className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2.5 font-display text-sm tracking-widest transition active:scale-95",
-              league.admin
-                ? "bg-gradient-to-r from-emerald-400 to-lime-400 text-emerald-950"
-                : "border border-line bg-panel-2 text-dim hover:text-ink",
-            )}
-          >
-            {league.admin ? "✔ MODO ADMIN" : "🔒 MODO ADMIN"}
-          </button>
+         
           {league.admin && (
             <button
               type="button"
@@ -94,13 +84,26 @@ export default function LeagueView() {
       <section className="overflow-hidden rounded-3xl border border-line bg-panel">
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3 sm:px-6">
           <h3 className="font-display text-xl tracking-widest text-ink">TABLA DE POSICIONES</h3>
-          <p className="font-display text-[10px] tracking-[0.2em] text-faint">
-            PJ · PG · PE · PP · GF · GC · DG · PTS
-          </p>
         </header>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
+            <thead>
+              {/* Celdas estándar como las filas: el layout de tabla alinea
+                  cada encabezado con su columna de números automáticamente. */}
+              <tr className="border-b border-line text-left font-display text-[9px] tracking-[0.2em] text-faint">
+                <th className="w-12 px-2 text-center">POS</th>
+                <th className="py-2 pr-3 text-left">EQUIPO</th>
+                <th className="w-10 text-center">PJ</th>
+                <th className="w-10 text-center">PG</th>
+                <th className="w-10 text-center">PE</th>
+                <th className="w-10 text-center">PP</th>
+                <th className="w-10 text-center">GF</th>
+                <th className="w-10 text-center">GC</th>
+                <th className="w-10 text-center">DG</th>
+                <th className="w-14 pr-4 text-right">PTS</th>
+              </tr>
+            </thead>
             <tbody>
               {standings.map((t, i) => {
                 const dg = t.gf - t.gc;
@@ -252,6 +255,8 @@ export default function LeagueView() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-xs">
                   <thead>
+                    {/* Celdas estándar como las filas: sincroniza encabezados
+                        e inputs sin necesidad de grid. */}
                     <tr className="text-left font-display text-[9px] tracking-[0.2em] text-faint">
                       <th className="px-1 py-2">EQUIPO</th>
                       {["PJ", "PG", "PE", "PP", "GF", "GC"].map((h) => (
@@ -259,7 +264,7 @@ export default function LeagueView() {
                           {h}
                         </th>
                       ))}
-                      <th className="w-16 px-1 text-right"></th>
+                      <th className="w-10 px-1 text-right"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -410,32 +415,52 @@ export default function LeagueView() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!newFixture.date || !newFixture.home || !newFixture.away) return;
+                  if (!newFixture.date || !newFixture.home || !newFixture.away) {
+                    setFixtureError("Completá fecha, local y visitante.");
+                    return;
+                  }
+                  if (newFixture.home === newFixture.away) {
+                    setFixtureError("El local y el visitante no pueden ser el mismo equipo.");
+                    return;
+                  }
                   league.addFixture(newFixture);
                   setNewFixture({ home: "", away: "", date: "" });
+                  setFixtureError("");
                 }}
                 className="flex flex-wrap items-center gap-2"
               >
                 <input
                   type="date"
                   value={newFixture.date}
-                  onChange={(e) => setNewFixture((f) => ({ ...f, date: e.target.value }))}
+                  onChange={(e) => {
+                    setFixtureError("");
+                    setNewFixture((f) => ({ ...f, date: e.target.value }));
+                  }}
                   className="rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink focus:border-amber-400/60 focus:outline-none"
                 />
                 <TeamSelect
                   value={newFixture.home}
-                  onChange={(v) => setNewFixture((f) => ({ ...f, home: v }))}
+                  onChange={(v) => {
+                    setFixtureError("");
+                    setNewFixture((f) => ({ ...f, home: v }));
+                  }}
                   placeholder="Local"
                 />
                 <span className="font-display text-dim">vs</span>
                 <TeamSelect
                   value={newFixture.away}
-                  onChange={(v) => setNewFixture((f) => ({ ...f, away: v }))}
+                  onChange={(v) => {
+                    setFixtureError("");
+                    setNewFixture((f) => ({ ...f, away: v }));
+                  }}
                   placeholder="Visitante"
                 />
                 <button className="rounded-lg bg-gradient-to-r from-emerald-400 to-lime-400 px-4 py-2 font-display text-xs tracking-widest text-emerald-950">
                   + AGREGAR FECHA
                 </button>
+                {fixtureError && (
+                  <p className="w-full text-[11px] text-rose-400">{fixtureError}</p>
+                )}
               </form>
               <p className="text-[11px] text-faint">
                 Si la fecha tiene goles, la tabla de posiciones se recalcula sola. Dejá los goles

@@ -114,6 +114,21 @@ export const RARITY: Record<Rarity, RarityTheme> = {
     initials: "from-sky-200 via-blue-200 to-indigo-300",
     badge: "bg-gradient-to-r from-sky-500 to-indigo-700 text-white",
   },
+  /** Categoría LEGENDAS (ids 300+): rojo legendario y dorado viejo. */
+  "LEGENDA": {
+    name: "LEGENDA",
+    frame: "from-rose-400 via-red-700 to-purple-900",
+    frameText: "text-white",
+    body: "from-rose-50 via-red-50 to-purple-100",
+    accentText: "text-rose-900",
+    chip: "bg-rose-900/10 text-rose-900 border-rose-900/20",
+    glow: "shadow-[0_16px_50px_-10px_rgba(244,63,94,0.9)]",
+    ring: "ring-rose-400/70",
+    holo: true,
+    scanlines: false,
+    initials: "from-rose-200 via-red-100 to-purple-200",
+    badge: "bg-gradient-to-r from-rose-500 via-red-600 to-purple-800 text-white",
+  },
 };
 
 export const rarityTheme = (s: Sticker): RarityTheme => RARITY[s.rarity] ?? RARITY["COMÚN"];
@@ -127,6 +142,8 @@ export const SELL_VALUE: Record<Rarity, number> = {
   "MODO DIOS": 320,
   "ALTERNATIVA": 400,
   "ESCUDO": 60,
+  /** LEGENDAS: la rareza más cara del álbum. */
+  "LEGENDA": 500,
 };
 
 export function initials(name: string) {

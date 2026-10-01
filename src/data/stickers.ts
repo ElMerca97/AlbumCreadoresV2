@@ -1,4 +1,13 @@
-export type Rarity = "COMÚN" | "ÉPICO" | "80'S" | "MODO DIOS" | "ALTERNATIVA" | "ESCUDO" | "COURT";
+export type Rarity =
+  | "COMÚN"
+  | "ÉPICO"
+  | "80'S"
+  | "MODO DIOS"
+  | "ALTERNATIVA"
+  | "ESCUDO"
+  | "COURT"
+  /** Categoría LEGENDAS: ids 300 en adelante (ver bloque //Legendas// más abajo). */
+  | "LEGENDA";
 
 export type Stats = {
   Pase: number;
@@ -100,7 +109,7 @@ export const stickers: Sticker[] = [
   { id: 102, playerId: "SeleccionMaldonadoCreadores", name: "Selección de Maldonado de Creadores", type: "club", club: "Selección de Maldonado de Creadores", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/SeleccionMaldonadoCreadores.png", quote: "Donde el fútbol y la creación se encuentran." },
   { id: 103, playerId: "Mazzoni", name: "Mazzoni FC", type: "club", club: "Mazzoni FC", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Mazzoni.png", quote: "Un escudo, una identidad." },
   { id: 104, playerId: "Sacachispas", name: "Sacachispas FC", type: "club", club: "Sacachispas FC", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Sacachispas.png", quote: "Pasión que se lleva en cada partido." },
-  { id: 105, playerId: "Presion", name: "Presión", type: "club", club: "Presión", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Presion.png", quote: "La presión también forma parte del juego." },
+  { id: 105, playerId: "5taafondo", name: "5ta a Fondo", type: "club", club: "5ta a Fondo", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/5taafondo.png", quote: "La presión también forma parte del juego." },
   { id: 106, playerId: "Vikingos", name: "Vikingos", type: "club", club: "Vikingos", version: "ESCUDOS", rarity: "ESCUDO", image: "images/Clubes/Vikingos.png", quote: "Fuerza, identidad y pasión." },
 
   // ───────────────────────── CANCHAS ─────────────────────────
@@ -114,6 +123,45 @@ export const stickers: Sticker[] = [
     quote: "Calidad garantizada y el mejor 3er tiempo.",
     type: "court",
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // //Leyendas//
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CATEGORÍA LEYENDAS · ids 300 en adelante · acá van los datos.
+  //
+  // ▶ REGLAS DE LOS IDS
+  //   - Arrancan en 300 y van en orden: 300, 301, 302, … sin repetir ni saltear.
+  //   - Si agregás más leyendas, seguí con el id siguiente (308, 309, …).
+  //   - No toques los ids ya usados: el álbum guarda el progreso por id.
+  //
+  // ▶ IMÁGENES
+  //   - Copiá los PNG en `public/images/stickers/Leyendas/` con el nombre EXACTO
+  //     que figura en el campo `image` (regla: la ruta del array = ruta en `public/`).
+  //     Ej: image "images/stickers/Leyendas/Mora.png"
+  //         → archivo `public/images/stickers/Leyendas/Mora.png`
+  //   - Podés ver cuáles faltan con el botón "🖼️ VERIFICAR IMÁGENES" del pie.
+  //
+  // ▶ DATOS DE CADA FIGURITA
+  //   id, playerId, name, version: "LEGENDAS", rarity: "LEGENDA", image y quote.
+  //   Son decorativas: NO llevan pos, team, number, rating ni stats — por eso
+  //   no se juegan en Mi Equipo ni en los amistosos (solo suman para el álbum).
+  //
+  // ▶ DÓNDE SE VE
+  //   - La sección del álbum sale de `SECTIONS` (más abajo en este archivo).
+  //   - El estilo/color de la carta y el valor de venta salen de la rareza
+  //     "LEGENDA" en `src/lib/rarity.ts`.
+  // ───────────────────────── LEYENDAS (ids 300-307) ─────────────────────────
+  { id: 300, playerId: "Mora", name: "Mora", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Mora.png", quote: "Un nombre que la hinchada canta solo." },
+  { id: 301, playerId: "Corbo", name: "Corbo", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Corbo.png", quote: "Garra, humor y una camiseta para siempre." },
+  { id: 302, playerId: "Rodri", name: "Rodri", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Rodri.png", quote: "El símbolo de una época inolvidable." },
+  { id: 303, playerId: "Nahu", name: "Nahu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Nahu.png", quote: "Talento puro, espíritu de creador." },
+  { id: 304, playerId: "Sangaraza", name: "Sangaraza", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Sangaraza.png", quote: "El 10 que hizo magia durante una década." },
+  { id: 305, playerId: "Kibu", name: "Kibu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Kibu.png", quote: "Lideró siempre con el ejemplo." },
+  { id: 306, playerId: "Aarón", name: "Aarón", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Aaron.png", quote: "El motor que nunca deja de funcionar." },
+  { id: 307, playerId: "Manu", name: "Manu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Manu.png", quote: "Los goles que hicieron historia en Maldonado." },
+
+  // //Legendas// FIN · para agregar otra, copiá una línea de arriba y usá el id 308.
+  // ═══════════════════════════════════════════════════════════════════════════
 ];
 
 /** Colecciones (secciones del álbum) en orden. */
@@ -125,6 +173,8 @@ export const SECTIONS: { version: string; short: string; blurb: string }[] = [
   { version: "ALTERNATIVA", short: "ALTERNATIVA", blurb: "Versiones paralelas e imposibles." },
   { version: "ESCUDOS", short: "ESCUDOS", blurb: "Los clubes y sus identidades." },
   { version: "COURT", short: "CANCHAS", blurb: "Especiales del álbum." },
+  // //Legendas// — sección de la categoría con ids 300 en adelante.
+  { version: "LEGENDAS", short: "LEGENDAS", blurb: "Las leyendas eternas de Maldonado. Nº 300 en adelante." },
 ];
 
 export const bySection = (version: string) => stickers.filter((s) => s.version === version);

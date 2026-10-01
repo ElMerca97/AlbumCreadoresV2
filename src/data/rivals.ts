@@ -10,7 +10,7 @@ export type Rival = {
 /**
  * Rivales ficticios para partidos amistosos. Ninguno pertenece a los equipos
  * del Fixture (ver `src/data/league.ts`: seleccion, carolino, chiveo, mazzoni,
- * sacachispas, presion, vikingos), así que pueden usarse libremente.
+ * sacachispas, quintaafondo, vikingos), así que pueden usarse libremente.
  */
 export const RIVALS: Rival[] = [
   { id: "r-estrella-roja", name: "Estrella Roja FC", strength: 1 },

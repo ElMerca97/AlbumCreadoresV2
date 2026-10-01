@@ -155,9 +155,9 @@ export default function App() {
             </span>
           </h2>
           <p className="mt-4 max-w-xl text-sm text-dim sm:text-base">
-            Común, Épico, 80's, Modo Dios, Alternativa y los escudos de los clubes. Abrí sobres,
-            pegá las que te faltan, vendé las repetidas y armá tu once ideal con las mejores
-            versiones de cada creador.
+            Común, Épico, 80's, Modo Dios, Alternativa, Leyendas, los escudos de los clubes y la
+            cancha Liffa. Abrí sobres, pegá las que te faltan, vendé las repetidas y armá tu once
+            ideal con las mejores versiones de cada creador.
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">

@@ -250,6 +250,10 @@ export default function FriendlyView() {
     // La recompensa se fija UNA VEZ según el resultado del sim.
     const reward = rewardForOutcome(sim.outcome);
 
+    // Consumimos uno de los 3 partidos ANTES de tocar el estado: si no hay cupo no
+    // queremos dejar un partido "fantasma" cargado en el componente.
+    if (!registerFriendly()) return;
+
     paidRef.current = false;
     setMatch({
       rival: selectedRival,
@@ -258,14 +262,6 @@ export default function FriendlyView() {
       homeIds: new Set(snapshot.map((p) => p.playerId)),
     });
     setRevealed(0);
-
-    // Consumimos uno de los 3 partidos.
-    const registered = registerFriendly();
-
-    if (!registered) {
-      return;
-    }
-
     setPhase("kickoff");
   };
 

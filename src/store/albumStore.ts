@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { CODES, findCode } from "@/data/codes";
+import { CODES, findCode, normalizeCode } from "@/data/codes";
 import { DEFAULT_FORMATION, formationById } from "@/data/formations";
 import { stickers } from "@/data/stickers";
-import { SELL_VALUE } from "@/lib/rarity";
 
 export const STORAGE_KEY = "maldonadocards";
 /** Versión del esquema persistido (debe coincidir con la `version` de `persist`). */
@@ -36,12 +35,11 @@ export type RedeemResult = {
   ok: boolean;
   message: string;
   coins?: number;
-  gifts?: string[];
 };
 
 export type AlbumActions = {
   addCoins: (n: number) => void;
-  /** Canjea un código: suma monedas y/o figuritas de regalo. */
+  /** Canjea un código: suma CreaCoins. */
   redeem: (raw: string) => RedeemResult;
   /** Suma figuritas al álbum. Devuelve las nuevas pegadas; gained queda en 0 (sin recompensa inmediata). */
   addStickers: (ids: number[]) => { fresh: number[]; gained: number };
@@ -67,10 +65,29 @@ export const initialState: AlbumState = {
   redeemed: [],
 };
 
-export const valueOf = (id: number) => {
-  const st = stickers.find((x) => x.id === id);
-  return st ? SELL_VALUE[st.rarity] : 20;
-};
+/**
+ * Valor ESTIMADO de una repetida para las estadísticas del álbum.
+ * La venta real (`sellExtra` / `sellAllExtras`) paga entre 5 y 15 CreaCoins
+ * al azar sin importar la rareza, así que usamos el punto medio (10).
+ */
+export const valueOf = (_id: number) => 10;
+
+/**
+ * Depura la lista de códigos canjeados: la normaliza (minúsculas, sin acentos
+ * ni espacios) y descarta los que ya no existen en `CODES` — el set de códigos
+ * cambió con el tiempo y los guardados viejos traen otro formato.
+ */
+function sanitizeRedeemed(list: unknown): string[] {
+  if (!Array.isArray(list)) return [];
+  const valid = new Set(CODES.map((c) => c.code));
+  const out = new Set<string>();
+  for (const entry of list) {
+    if (typeof entry !== "string") continue;
+    const code = normalizeCode(entry);
+    if (valid.has(code)) out.add(code);
+  }
+  return [...out];
+}
 
 /**
  * Migra el guardado del álbum anterior (app vanilla, clave `maldonadoAlbumV2`) al
@@ -102,9 +119,8 @@ function migrateLegacy() {
       redeemedCodes?: unknown;
     };
 
-    // El álbum anterior usaba otro set de códigos: sólo conservamos los que existen acá.
-    const validCodes = new Set(CODES.map((c) => c.code));
-
+    // El álbum anterior usaba otro set de códigos: normalizamos y sólo
+    // conservamos los que existen acá (ver sanitizeRedeemed).
     const state: AlbumState = {
       ...initialState,
       owned: Array.isArray(old.collectedIds)
@@ -112,9 +128,7 @@ function migrateLegacy() {
         : [],
       coins: typeof old.coins === "number" ? old.coins : initialState.coins,
       packsOpened: typeof old.openedPacks === "number" ? old.openedPacks : 0,
-      redeemed: Array.isArray(old.redeemedCodes)
-        ? old.redeemedCodes.filter((c): c is string => typeof c === "string" && validCodes.has(c))
-        : [],
+      redeemed: sanitizeRedeemed(old.redeemedCodes),
     };
 
     // Se guarda con la versión ACTUAL: si se guardara con una anterior, el `migrate` de
@@ -146,31 +160,28 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
       addCoins: (n) => set((s) => ({ coins: Math.max(0, s.coins + n) })),
 
       redeem: (raw) => {
-        const code = raw.trim().toUpperCase().replace(/\s+/g, "");
+        const code = normalizeCode(raw);
         if (!code) return { ok: false, message: "Escribí un código para canjear." };
         if (get().redeemed.includes(code))
           return { ok: false, message: "Ese código ya fue canjeado en este navegador." };
 
         const found = findCode(raw);
-        if (!found) return { ok: false, message: "Código inválido. Revisá las pistas." };
-
-        const giftNames: string[] = [];
-        if (found.gifts?.length) {
-          for (const id of found.gifts) {
-            const st = stickers.find((x) => x.id === id);
-            if (st) giftNames.push(`${st.name} (${st.version.replace("VERSION ", "")})`);
-          }
-          get().addStickers(found.gifts);
-        }
+        if (!found)
+          return {
+            ok: false,
+            message: "Código inválido: revisá el nombre del jugador y su número.",
+          };
 
         set((s) => ({
           coins: s.coins + found.coins,
           redeemed: [...s.redeemed, code],
         }));
 
-        const parts = [`+${found.coins} CreaCoins`];
-        if (giftNames.length) parts.push(`regalo: ${giftNames.join(", ")}`);
-        return { ok: true, message: `¡Código canjeado! ${parts.join(" · ")}`, coins: found.coins };
+        return {
+          ok: true,
+          message: `¡Código canjeado! +${found.coins} CreaCoins`,
+          coins: found.coins,
+        };
       },
 
       addStickers: (ids) => {
@@ -236,7 +247,23 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
           return { lineup };
         }),
 
-      setLineupFormat: (id) => set({ lineupFormat: formationById(id).id }),
+      setLineupFormat: (id) => {
+        const formation = formationById(id);
+        set((s) => {
+          const lineup = { ...s.lineup };
+          // Al cambiar de formación, libera los puestos cuyo cromo ya no encaja
+          // (posición incompatible con el slot, escudo/leyenda sin posición, o
+          // cromo eliminado del álbum): si no, quedaría una alineación inválida
+          // que solo se avisa recién al querer jugar un amistoso.
+          for (const slot of formation.slots) {
+            const stickerId = lineup[slot.key];
+            if (stickerId == null) continue;
+            const st = stickers.find((x) => x.id === stickerId);
+            if (!st || !st.pos || !slot.accepts.includes(st.pos)) lineup[slot.key] = null;
+          }
+          return { lineupFormat: formation.id, lineup };
+        });
+      },
 
       reset: () =>
         set({ ...initialState, owned: [], extras: {}, lineup: {}, redeemed: [] }),
@@ -274,7 +301,7 @@ export const useAlbumStore = create<AlbumState & AlbumActions>()(
           lineup: migrateLineup(p.lineup, current.lineup),
           lineupFormat:
             typeof p.lineupFormat === "string" ? p.lineupFormat : current.lineupFormat,
-          redeemed: Array.isArray(p.redeemed) ? p.redeemed : current.redeemed,
+          redeemed: Array.isArray(p.redeemed) ? sanitizeRedeemed(p.redeemed) : current.redeemed,
         };
       },
     },

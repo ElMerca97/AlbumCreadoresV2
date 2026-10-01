@@ -21,7 +21,7 @@ Si una ruta exacta no existe, la app prueba automáticamente:
 
 Tamaño recomendado: PNG con fondo transparente, ~600×800 px (proporción 3:4).
 
-## 🗂️ Estructura y archivos esperados (60)
+## 🗂️ Estructura y archivos esperados (69)
 
 ```
 public/images/
@@ -30,8 +30,10 @@ public/images/
 │   ├── Legends/        (15)  ← VERSION ÉPICO
 │   ├── 80's/           (9)
 │   ├── Dios/           (12)  ← MODO DIOS
-│   └── Alternative/    (2)
-└── Clubes/             (7)   ← ESCUDOS
+│   ├── Alternative/    (2)
+│   └── Leyendas/       (8)   ← LEYENDAS (ids 300-307, decorativas)
+├── Clubes/             (7)   ← ESCUDOS
+└── Cancha/             (1)   ← CANCHA LIFFA (id 200)
 ```
 
 ### stickers/Comun/ — VERSION COMÚN
@@ -97,14 +99,29 @@ public/images/
 - AlternativeMato.png
 - AlternativeSangaraza.png
 
+### stickers/Leyendas/ — LEYENDAS (ids 300-307)
+Los datos están en `src/data/stickers.ts`, bloque marcado con `//Leyendas//`.
+Son **decorativas**: sin posición ni estadísticas.
+- Mora.png           → id 300
+- Corbo.png          → id 301
+- Rodri.png          → id 302
+- Nahu.png           → id 303
+- Sangaraza.png      → id 304
+- Kibu.png           → id 305
+- Aaron.png          → id 306
+- Manu.png           → id 307
+
 ### Clubes/ — ESCUDOS
 - Chiveo.png
 - FCCarolino.png
 - Mazzoni.png
-- Presion.png
+- 5taafondo.png
 - Sacachispas.png
 - SeleccionMaldonadoCreadores.png
 - Vikingos.png
+
+### Cancha/ — CANCHA LIFFA (id 200)
+- CanchaLiffa.png   ← ojo: en el array la ruta arranca con "/" (`/images/Cancha/...`)
 
 ## 🔧 Cambiar la raíz (opcional)
 

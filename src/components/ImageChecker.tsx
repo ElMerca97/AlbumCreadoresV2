@@ -5,7 +5,12 @@ import { cn } from "@/utils/cn";
 
 type Row = { id: number; name: string; path: string; status: "loading" | "ok" | "missing"; src: string | null };
 
-const folderOf = (p: string) => p.slice(0, p.lastIndexOf("/"));
+/** Carpeta del archivo, normalizada (sin "/" inicial) para no duplicar grupos. */
+const folderOf = (p: string) => {
+  const clean = p.replace(/^\/+/, "");
+  const i = clean.lastIndexOf("/");
+  return i === -1 ? "" : clean.slice(0, i);
+};
 const fileOf = (p: string) => p.slice(p.lastIndexOf("/") + 1);
 
 export default function ImageChecker({ onClose }: { onClose: () => void }) {
