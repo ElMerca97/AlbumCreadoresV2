@@ -157,8 +157,8 @@ export const PACKS: PackDef[] = [
     guarantee: [],
     filler: [
       // Promedio simple de Retro, Modo Dios, Alternativa y Mega Sobre.
-      // El 2% de COMÚN se reinvierte en LEGENDA (≈1 de cada 10 sobres de Oro).
-      { rarity: "LEGENDA", w: 0.12 },
+      // El 2% de COMÚN se reinvierte en LEYENDA (≈1 de cada 10 sobres de Oro).
+      { rarity: "LEYENDA", w: 0.12 },
       { rarity: "COMÚN", w: 0.1070833 },
       { rarity: "ÉPICO", w: 0.215625 },
       { rarity: "ESCUDO", w: 0.028125 },
@@ -178,8 +178,8 @@ export const PACKS: PackDef[] = [
     guarantee: [],
     filler: [
       // Un paso por encima de Oro: más rarezas altas, sin un salto exagerado.
-      // El 4% de COMÚN se reinvierte en LEGENDA (≈1 de cada 4 sobres Creadores).
-      { rarity: "LEGENDA", w: 0.04 },
+      // El 4% de COMÚN se reinvierte en LEYENDA (≈1 de cada 4 sobres Creadores).
+      { rarity: "LEYENDA", w: 0.04 },
       { rarity: "COMÚN", w: 0.04 },
       { rarity: "ÉPICO", w: 0.22 },
       { rarity: "ESCUDO", w: 0.02 },
@@ -229,7 +229,7 @@ function drawFrom(rarity: Rarity, owned: Set<number>): Sticker {
 
 /** Probabilidades por rareza dentro de un sobre (para mostrar en la tienda). */
 const RARITY_ORDER: Rarity[] = [
-  "LEGENDA",
+  "LEYENDA",
   "MODO DIOS",
   "ALTERNATIVA",
   "80'S",
@@ -449,7 +449,7 @@ export default function PacksView({ onOpenCard }: Props) {
                 const best =
                   p.sticker.rarity === "MODO DIOS" ||
                   p.sticker.rarity === "ALTERNATIVA" ||
-                  p.sticker.rarity === "LEGENDA";
+                  p.sticker.rarity === "LEYENDA";
                 return (
                   <div
                     key={`${p.sticker.id}-${i}`}

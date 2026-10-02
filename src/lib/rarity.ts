@@ -114,9 +114,9 @@ export const RARITY: Record<Rarity, RarityTheme> = {
     initials: "from-sky-200 via-blue-200 to-indigo-300",
     badge: "bg-gradient-to-r from-sky-500 to-indigo-700 text-white",
   },
-  /** Categoría LEGENDAS (ids 300+): rojo legendario y dorado viejo. */
-  "LEGENDA": {
-    name: "LEGENDA",
+  /** Categoría LEYENDAS (ids 300+): rojo legendario y dorado viejo. */
+  "LEYENDA": {
+    name: "LEYENDA",
     frame: "from-rose-400 via-red-700 to-purple-900",
     frameText: "text-white",
     body: "from-rose-50 via-red-50 to-purple-100",
@@ -142,8 +142,8 @@ export const SELL_VALUE: Record<Rarity, number> = {
   "MODO DIOS": 320,
   "ALTERNATIVA": 400,
   "ESCUDO": 60,
-  /** LEGENDAS: la rareza más cara del álbum. */
-  "LEGENDA": 500,
+  /** LEYENDAS: la rareza más cara del álbum. */
+  "LEYENDA": 500,
 };
 
 export function initials(name: string) {

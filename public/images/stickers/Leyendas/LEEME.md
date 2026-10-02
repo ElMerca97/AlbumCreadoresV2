@@ -1,7 +1,7 @@
 # stickers/Leyendas/ — Categoría LEYENDAS (ids 300-307)
 
-Acá van los PNG de la categoría **LEGENDAS** del álbum (`version: "LEGENDAS"`,
-`rarity: "LEGENDA"`, ids **300-307**).
+Acá van los PNG de la categoría **LEYENDAS** del álbum (`version: "LEYENDAS"`,
+`rarity: "LEYENDA"`, ids **300-307**).
 
 > Son figuritas **decorativas**: no llevan posición, dorsal ni estadísticas,
 > así que no se juegan en Mi Equipo ni en los amistosos. Solo suman para

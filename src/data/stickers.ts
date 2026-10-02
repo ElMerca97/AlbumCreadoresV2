@@ -6,8 +6,8 @@ export type Rarity =
   | "ALTERNATIVA"
   | "ESCUDO"
   | "COURT"
-  /** Categoría LEGENDAS: ids 300 en adelante (ver bloque //Legendas// más abajo). */
-  | "LEGENDA";
+  /** Categoría LEYENDAS: ids 300 en adelante (ver bloque //Leyendas// más abajo). */
+  | "LEYENDA";
 
 export type Stats = {
   Pase: number;
@@ -142,25 +142,25 @@ export const stickers: Sticker[] = [
   //   - Podés ver cuáles faltan con el botón "🖼️ VERIFICAR IMÁGENES" del pie.
   //
   // ▶ DATOS DE CADA FIGURITA
-  //   id, playerId, name, version: "LEGENDAS", rarity: "LEGENDA", image y quote.
+  //   id, playerId, name, version: "LEYENDAS", rarity: "LEYENDA", image y quote.
   //   Son decorativas: NO llevan pos, team, number, rating ni stats — por eso
   //   no se juegan en Mi Equipo ni en los amistosos (solo suman para el álbum).
   //
   // ▶ DÓNDE SE VE
   //   - La sección del álbum sale de `SECTIONS` (más abajo en este archivo).
   //   - El estilo/color de la carta y el valor de venta salen de la rareza
-  //     "LEGENDA" en `src/lib/rarity.ts`.
+  //     "LEYENDA" en `src/lib/rarity.ts`.
   // ───────────────────────── LEYENDAS (ids 300-307) ─────────────────────────
-  { id: 300, playerId: "Mora", name: "Mora", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Mora.png", quote: "Un nombre que la hinchada canta solo." },
-  { id: 301, playerId: "Corbo", name: "Corbo", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Corbo.png", quote: "Garra, humor y una camiseta para siempre." },
-  { id: 302, playerId: "Rodri", name: "Rodri", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Rodri.png", quote: "El símbolo de una época inolvidable." },
-  { id: 303, playerId: "Nahu", name: "Nahu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Nahu.png", quote: "Talento puro, espíritu de creador." },
-  { id: 304, playerId: "Sangaraza", name: "Sangaraza", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Sangaraza.png", quote: "El 10 que hizo magia durante una década." },
-  { id: 305, playerId: "Kibu", name: "Kibu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Kibu.png", quote: "Lideró siempre con el ejemplo." },
-  { id: 306, playerId: "Aarón", name: "Aarón", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Aaron.png", quote: "El motor que nunca deja de funcionar." },
-  { id: 307, playerId: "Manu", name: "Manu", version: "LEGENDAS", rarity: "LEGENDA", image: "images/stickers/Leyendas/Manu.png", quote: "Los goles que hicieron historia en Maldonado." },
+  { id: 300, playerId: "Mora", name: "Mora", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Mora.png", quote: "Un nombre que la hinchada canta solo." },
+  { id: 301, playerId: "Corbo", name: "Corbo", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Corbo.png", quote: "Garra, humor y una camiseta para siempre." },
+  { id: 302, playerId: "Rodri", name: "Rodri", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Rodri.png", quote: "El símbolo de una época inolvidable." },
+  { id: 303, playerId: "Nahu", name: "Nahu", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Nahu.png", quote: "Talento puro, espíritu de creador." },
+  { id: 304, playerId: "Sangaraza", name: "Sangaraza", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Sangaraza.png", quote: "El 10 que hizo magia durante una década." },
+  { id: 305, playerId: "Kibu", name: "Kibu", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Kibu.png", quote: "Lideró siempre con el ejemplo." },
+  { id: 306, playerId: "Aarón", name: "Aarón", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Aaron.png", quote: "El motor que nunca deja de funcionar." },
+  { id: 307, playerId: "Manu", name: "Manu", version: "LEYENDAS", rarity: "LEYENDA", image: "images/stickers/Leyendas/Manu.png", quote: "Los goles que hicieron historia en Maldonado." },
 
-  // //Legendas// FIN · para agregar otra, copiá una línea de arriba y usá el id 308.
+  // //Leyendas// FIN · para agregar otra, copiá una línea de arriba y usá el id 308.
   // ═══════════════════════════════════════════════════════════════════════════
 ];
 
@@ -173,8 +173,8 @@ export const SECTIONS: { version: string; short: string; blurb: string }[] = [
   { version: "ALTERNATIVA", short: "ALTERNATIVA", blurb: "Versiones paralelas e imposibles." },
   { version: "ESCUDOS", short: "ESCUDOS", blurb: "Los clubes y sus identidades." },
   { version: "COURT", short: "CANCHAS", blurb: "Especiales del álbum." },
-  // //Legendas// — sección de la categoría con ids 300 en adelante.
-  { version: "LEGENDAS", short: "LEGENDAS", blurb: "Las leyendas eternas de Maldonado. Nº 300 en adelante." },
+  // //Leyendas// — sección de la categoría con ids 300 en adelante.
+  { version: "LEYENDAS", short: "LEYENDAS", blurb: "Las leyendas eternas de Maldonado. Nº 300 en adelante." },
 ];
 
 export const bySection = (version: string) => stickers.filter((s) => s.version === version);

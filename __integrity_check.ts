@@ -60,7 +60,7 @@ if (huérfanos.length) console.log(`  ⚠ ${huérfanos.length} sin referenciar:\
 else ok("todos referenciados");
 
 console.log("5) Codes/leyendas:");
-const leyendas = stickers.filter((s) => s.rarity === "LEGENDA");
+const leyendas = stickers.filter((s) => s.rarity === "LEYENDA");
 const sinLeyenda = leyendas.map((s) => `${s.id}:${s.name}`);
 ok(`leyendas: ${sinLeyenda.join(", ")}`);
 

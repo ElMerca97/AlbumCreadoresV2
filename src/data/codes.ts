@@ -51,7 +51,7 @@ function buildCodes(): CodeDef[] {
   // prevalece 369 (es el que trae la versión COMÚN).
   const jugadores = new Map<string, { name: string; number?: number }>();
   for (const s of stickers) {
-    if (s.type === "club" || s.type === "court" || s.rarity === "LEGENDA") continue;
+    if (s.type === "club" || s.type === "court" || s.rarity === "LEYENDA") continue;
     if (jugadores.has(s.playerId)) continue;
     jugadores.set(s.playerId, { name: s.name, number: s.number });
   }
@@ -77,7 +77,7 @@ function buildCodes(): CodeDef[] {
 
   // Leyendas: solo el nombre (son decorativas y no llevan número).
   for (const s of stickers) {
-    if (s.rarity === "LEGENDA") add(normalizeCode(s.name));
+    if (s.rarity === "LEYENDA") add(normalizeCode(s.name));
   }
 
   return [...byCode.values()];
